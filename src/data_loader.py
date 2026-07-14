@@ -77,11 +77,13 @@ def describe_dataset(
 			f"{name}:",
 			f"  images: shape={images.shape}, dtype={images.dtype}, min={pixel_min}, max={pixel_max}",
 			f"  labels: shape={labels.shape}, dtype={labels.dtype}, unique_classes={len(unique_classes)}",
-			"  class counts:",
-			"    class | count",
+			"  class counts and frequencies:",
+			"    class | count | frequency",
 		]
 		for class_id in range(10):
-			lines.append(f"    {class_id:>5} | {count_map.get(class_id, 0):>5}")
+			count = count_map.get(class_id, 0)
+			frequency = count / len(labels) if len(labels) > 0 else 0
+			lines.append(f"    {class_id:>5} | {count:>5} | {frequency:.3f}")
 		return lines
 
 	lines = [
