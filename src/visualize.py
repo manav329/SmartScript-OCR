@@ -2,16 +2,25 @@
 
 from __future__ import annotations
 
-from typing import Optional
+if __package__ is None or __package__ == "":
+	import sys
+	from pathlib import Path
+
+	sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from typing import Optional, Sequence
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+from src.data_loader import load_mnist
+from src.predict import load_trained_model, predict_batch
 
 
 def plot_sample_grid(
 	images: np.ndarray,
 	labels: np.ndarray,
-	predictions: Optional[np.ndarray] = None,
+	predictions: Optional[Sequence[tuple[int, float]] | np.ndarray] = None,
 	num_samples: int = 25,
 	save_path: Optional[str] = None,
 	random_seed: int = 42,
@@ -21,7 +30,8 @@ def plot_sample_grid(
 	Args:
 		images: Image array of shape ``(n_samples, height, width)``.
 		labels: Label array of shape ``(n_samples,)``.
-		predictions: Optional array of predicted labels.
+		predictions: Optional sequence of ``(predicted_label, confidence)``
+			values aligned with ``images`` and ``labels``.
 		num_samples: Number of samples to show. Must be a perfect square.
 		save_path: Optional path where the figure is saved at 150 DPI.
 		random_seed: Seed used to make random sampling reproducible.
@@ -38,15 +48,32 @@ def plot_sample_grid(
 		raise ValueError("num_samples must be a perfect square.")
 	if num_samples > total_images:
 		raise ValueError("num_samples cannot exceed the number of available images.")
+	if predictions is not None and len(predictions) != total_images:
+		raise ValueError(
+			"predictions must have the same length as images and labels: "
+			f"got {len(predictions)} predictions for {total_images} images."
+		)
 
 	rng = np.random.RandomState(random_seed)
 	indices = rng.choice(total_images, size=num_samples, replace=False)
+	predicted_labels = None
+	prediction_confidences = None
+	if predictions is not None:
+		predictions_array = np.asarray(predictions, dtype=object)
+		predicted_labels = np.asarray([int(item[0]) for item in predictions_array])
+		prediction_confidences = np.asarray([float(item[1]) for item in predictions_array])
 
 	fig, axes = plt.subplots(grid_size, grid_size, figsize=(8, 8))
 	for axis, index in zip(axes.flat, indices):
 		axis.imshow(images[index], cmap="gray")
 		if predictions is not None:
-			axis.set_title(f"True: {labels[index]}, Pred: {predictions[index]}")
+			predicted_label = int(predicted_labels[index])
+			confidence = float(prediction_confidences[index])
+			match = predicted_label == int(labels[index])
+			axis.set_title(
+				f"True: {int(labels[index])}\nPred: {predicted_label} ({confidence:.4f})"
+			)
+			axis.title.set_color("red" if not match else "black")
 		else:
 			axis.set_title(str(labels[index]))
 		axis.set_xticks([])
@@ -131,8 +158,11 @@ def plot_confusion_matrix(
 
 
 if __name__ == "__main__":
-	from data_loader import load_mnist
+	from pathlib import Path
 
-	(x_train, y_train), _ = load_mnist()
-	plot_sample_grid(x_train, y_train, num_samples=25, random_seed=42)
-	plot_class_distribution(y_train, title="MNIST Training Set Class Distribution")
+	(_, _), (x_test, y_test) = load_mnist()
+	model_path = Path(__file__).resolve().parent.parent / "models" / "mnist_cnn_final.keras"
+	model = load_trained_model(str(model_path))
+	predictions = predict_batch(model, x_test)
+	plot_sample_grid(x_test, y_test, predictions=predictions, num_samples=25, random_seed=42)
+	plot_class_distribution(y_test, title="MNIST Test Set Class Distribution")
