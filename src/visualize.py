@@ -13,8 +13,8 @@ from typing import Optional, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 
-from src.data_loader import load_mnist
-from src.predict import load_trained_model, predict_batch
+from data_loader import load_mnist
+from predict import load_trained_model, predict_batch
 
 
 def plot_sample_grid(
