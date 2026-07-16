@@ -85,6 +85,51 @@ def plot_class_distribution(
 	plt.show()
 
 
+def plot_confusion_matrix(
+	cm: np.ndarray,
+	class_names: list[str],
+	save_path: Optional[str] = None,
+) -> None:
+	"""Plot a confusion matrix heatmap with annotated cell counts.
+
+	Args:
+		cm: Confusion matrix array where rows are true classes and columns are
+			predicted classes.
+		class_names: Ordered class labels used for both axes.
+		save_path: Optional path where the figure is saved at 150 DPI.
+	"""
+
+	fig, axis = plt.subplots(figsize=(8, 6))
+	heatmap = axis.imshow(cm, interpolation="nearest", cmap="Blues")
+	fig.colorbar(heatmap, ax=axis)
+
+	axis.set_title("Confusion Matrix")
+	axis.set_xlabel("Predicted")
+	axis.set_ylabel("True")
+	axis.set_xticks(np.arange(len(class_names)))
+	axis.set_yticks(np.arange(len(class_names)))
+	axis.set_xticklabels(class_names)
+	axis.set_yticklabels(class_names)
+
+	threshold = cm.max() / 2.0 if cm.size else 0.0
+	for row_index in range(cm.shape[0]):
+		for column_index in range(cm.shape[1]):
+			value = cm[row_index, column_index]
+			axis.text(
+				column_index,
+				row_index,
+				f"{int(value)}",
+				ha="center",
+				va="center",
+				color="white" if value > threshold else "black",
+			)
+
+	fig.tight_layout()
+	if save_path is not None:
+		fig.savefig(save_path, dpi=150, bbox_inches="tight")
+	plt.show()
+
+
 if __name__ == "__main__":
 	from data_loader import load_mnist
 
