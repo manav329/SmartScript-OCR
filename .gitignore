@@ -14,3 +14,7 @@ data/custom/*
 !data/custom/.gitkeep
 images/test/*
 !images/test/.gitkeep
+logs/*
+!logs/.gitkeep  
+checkpoints/*
+!checkpoints/.gitkeep
