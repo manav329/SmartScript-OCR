@@ -1,3 +1,6 @@
+matplotlib
 numpy
-tensorflow
+pandas
+scikit-learn
 tensorboard
+tensorflow
