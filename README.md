@@ -20,7 +20,7 @@ This project implements a Convolutional Neural Network (CNN) for handwritten dig
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/manav329/SmartScript-OCR.git
    cd handwritten-recognition
    ```
 
@@ -73,12 +73,9 @@ The CNN model consists of the following layers:
 
 ## Results
 
-- Training Accuracy: ~99%
-- Test Accuracy: ~99%
+- Training Accuracy: ~97%
+- Test Accuracy: ~96%
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Authors
 
